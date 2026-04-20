@@ -11,9 +11,9 @@ def obtener_precio_accion(driver, consulta):
     driver.get(url)
 
     try:
-        espera = WebDriverWait(driver, 5)
-        # Extrae nombre de empresa
-        empresa = driver.find_element(By.CSS_SELECTOR, "div[class='PZPZlf ssJ7i B5dxMb']").text
+        espera = WebDriverWait(driver, 0)
+        # Extrae toma de referencia el primer precio de la lista de relacionados como un paso restrictivo para tomar el precio de la accion seleccionada
+        espera.until(EC.presence_of_element_located((By.CSS_SELECTOR, "span[jsname='vWLAgc']")))
         # Extrae precio de accion
         precio = driver.find_element(By.CSS_SELECTOR, "span[jsname='L3mUVe']").text
         # Extrae divisa de accion
@@ -26,3 +26,5 @@ def obtener_precio_accion(driver, consulta):
     except Exception as e:
         print(f"[ERROR DEBUG FATAL] Acción: {e}")
         return f"Error procesando la página de finanzas para '{empresa}'."
+    
+#empresa = driver.find_element(By.CSS_SELECTOR, "div[class='PZPZlf ssJ7i B5dxMb']").text

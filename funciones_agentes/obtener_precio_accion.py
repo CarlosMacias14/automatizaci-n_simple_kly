@@ -1,30 +1,28 @@
-# importar la función By de selenium.webdriver.common.by,
-# misma que permite seleccionar elementos de una página web
-# por medio de selectores CSS.
 from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from utils.sanitizar import extraer_entidad
+from urllib.parse import quote_plus
+import re
 
-# Función para obtener el precio de una acción
-# Parámetros:
-# - driver: objeto de Selenium WebDriver
-# - consulta: cadena de texto que contiene la consulta del usuario
 def obtener_precio_accion(driver, consulta):
-    # Buscar el precio de una acción en Google
-    driver.get(f"https://www.google.com/search?q=precio+acción+{consulta}")
+    empresa = extraer_entidad(consulta)
+    url = f"https://www.google.com/search?q={quote_plus(f'precio accion {empresa}')}&hl=es&gl=mx"
+    driver.get(url)
 
-    # Bloque try-except para manejar errores
     try:
-        # Obtener el nombre completo de la emprea
+        espera = WebDriverWait(driver, 5)
+        # Extrae nombre de empresa
         empresa = driver.find_element(By.CSS_SELECTOR, "div[class='PZPZlf ssJ7i B5dxMb']").text
+        # Extrae precio de accion
+        precio = driver.find_element(By.CSS_SELECTOR, "span[jsname='L3mUVe']").text
+        # Extrae divisa de accion
+        divisa = driver.find_element(By.CSS_SELECTOR, "span[jsname='T3Us2d']").text
+        # Extrae tikcer de accion, ejemplo Microsoft [BMV: MSFT]
+        ticker = driver.find_element(By.CSS_SELECTOR, 'div[class="iAIpCb PZPZlf"]').text
+        # Resultado del scraping
+        return f"{empresa.title()} [{ticker}] ${precio} {divisa.upper()}"            
 
-        # Obtener el precio de la acción
-        precio = driver.find_element(By.CSS_SELECTOR, "span[jsname='vWLAgc']").text
-
-        # Obtener la divisa de la acción
-        divisa = 
-
-        # Obtener el ticker de la acción. Éste es el código que se usa para identificar la acción en la bolsa. Por ejemplo, el ticker de Apple es AAPL.
-        ticker = 
-        
-        return f"{empresa} [{ticker}]  ${precio} {divisa.upper()}."
     except Exception as e:
-        return "No se pudo obtener el precio de la acción en este momento."
+        print(f"[ERROR DEBUG FATAL] Acción: {e}")
+        return f"Error procesando la página de finanzas para '{empresa}'."
